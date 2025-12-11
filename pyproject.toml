@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "catastrophe-morph-mcp"
+version = "1.0.0"
+description = "CatastropheMorph MCP Server - Apply catastrophe theory aesthetic enhancements"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "Dal Marsters", email = "dal@lushy.app"}]
+dependencies = []

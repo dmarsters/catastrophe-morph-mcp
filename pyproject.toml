@@ -1,12 +1,78 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "catastrophe-morph-mcp"
-version = "1.0.0"
-description = "CatastropheMorph MCP Server - Apply catastrophe theory aesthetic enhancements"
-requires-python = ">=3.8"
-license = {text = "MIT"}
-authors = [{name = "Dal Marsters", email = "dal@lushy.app"}]
-dependencies = []
+version = "1.2.0"
+description = "MCP server mapping René Thom's seven elementary catastrophes to visual aesthetic parameters with trajectory dynamics, rhythmic composition, and attractor visualization prompt generation"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Dal Marsters" },
+]
+keywords = [
+    "mcp",
+    "catastrophe-theory",
+    "aesthetic-dynamics",
+    "visual-vocabulary",
+    "computational-aesthetics",
+    "rene-thom",
+    "image-generation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dynamics = [
+    "aesthetic-dynamics-core>=1.0.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]
+
+[project.urls]
+Homepage = "https://github.com/dmarsters/catastrophe-morph-mcp"
+Repository = "https://github.com/dmarsters/catastrophe-morph-mcp"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+artifacts = ["ologs/*.yaml"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "server.py",
+    "ologs/catastrophe_theory.yaml",
+    "pyproject.toml",
+    "README.md",
+    "LICENSE",
+]
+
+# FastMCP entry point
+[project.scripts]
+catastrophe-morph-mcp = "server:mcp.run"
+
+# MCP server metadata (used by FastMCP discovery)
+[tool.fastmcp]
+server = "server:mcp"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

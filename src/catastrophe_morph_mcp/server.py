@@ -1,6 +1,6 @@
 """
-Catastrophe Morph MCP Server - Phase 1A + Phase 2.6 + Phase 2.7 + Forced Orbit Enhanced
-========================================================================================
+Catastrophe Morph MCP Server - Phase 1A + Phase 2.6 + Phase 2.7 + Phase 2.8 + Forced Orbit Enhanced
+====================================================================================================
 
 Maps René Thom's seven elementary catastrophes to visual aesthetic parameters
 with integrated trajectory computation, rhythmic composition, and attractor
@@ -9,7 +9,7 @@ visualization prompt generation.
 Architecture:
   Layer 1: Pure taxonomy (catastrophe_theory.yaml) - 0 tokens
   Layer 2: Deterministic operations + trajectory dynamics + rhythmic composition
-           + attractor visualization prompts - 0 tokens  
+           + attractor visualization prompts + evolution classification - 0 tokens  
   Layer 3: Claude synthesis - ~100-200 tokens
 
 Phase 1A Enhancement:
@@ -30,6 +30,15 @@ Phase 2.7 Enhancement:
   - Composite, split-view, and sequence prompt modes
   - Preset attractor catalog from Tier 4D multi-domain discovery
   - Keyframe prompt extraction from rhythmic preset trajectories
+
+Phase 2.8 Enhancement (Evolution State Classification):
+  - Functor from dynamical system observables to catastrophe morphospace
+  - Crystal field evolution states mapped to 5D catastrophe coordinates
+  - classify_evolution_state: (eigen_drift, diff_mag) → morphology + prompt
+  - map_observables_to_morphospace: continuous interpolation in 5D space
+  - amorphosis_cycle rhythmic preset for full evolution trajectory
+  - Generalizable pattern: any simulation outputting drift/change metrics
+    gets catastrophe aesthetics at zero LLM cost
 
 Forced Orbit Integration (v1.2.0):
   - Production-ready phase-space integration for limit cycles
@@ -83,8 +92,8 @@ print(f"Dynamics available: {DYNAMICS_AVAILABLE}", file=sys.stderr)
 # Server Configuration
 # ============================================================================
 
-SERVER_VERSION = "1.2.0-phase2.7-attractor-viz"
-VALIDATION_DATE = "2026-02-06"
+SERVER_VERSION = "1.3.0-phase2.8-evolution-classification"
+VALIDATION_DATE = "2026-02-09"
 
 # ============================================================================
 # LOAD TAXONOMY FROM OLOG
@@ -236,6 +245,108 @@ PARAMETER_NAMES = [
 
 # Parameter bounds (all normalized to [0, 1])
 PARAMETER_BOUNDS = [0.0, 1.0]
+
+
+# ============================================================================
+# PHASE 2.8: Crystal Field Evolution State Mapping
+# ============================================================================
+#
+# Functor from dynamical system observables → catastrophe morphospace.
+# Maps Jeremiah's crystal field evolution states (classified by eigen_drift
+# and diff_mag) to 5D catastrophe coordinates with visual vocabulary.
+#
+# This establishes a generalizable pattern: any simulation that outputs
+# drift-like and change-like metrics can be classified into catastrophe
+# morphology at zero LLM cost.
+#
+# Observable space:
+#   eigen_drift: deviation from baseline SVD modes (structural change)
+#   diff_mag: frame-to-frame field magnitude change (temporal volatility)
+#
+# Classification thresholds (from crystal field simulation):
+#   Stable Harmonic:  drift < 0.05 AND Δ < 0.01
+#   Phase Migration:  intermediate (between stable and chaotic)
+#   Wave Chaos:       Δ > 0.1
+#   Fractal Bloom:    drift > 0.2
+
+CRYSTAL_EVOLUTION_STATES = {
+    "stable_harmonic": {
+        "name": "Stable Harmonic",
+        "description": "Ordered crystalline coherence — field locked to baseline modes",
+        "coordinates": {
+            "control_complexity": 0.0,
+            "geometric_sharpness": 0.15,
+            "surface_tension": 0.25,
+            "optical_intensity": 0.35,
+            "aesthetic_intensity": 0.40
+        },
+        "observables": {
+            "eigen_drift_max": 0.05,
+            "diff_mag_max": 0.01
+        },
+        "nearest_catastrophe": "fold",
+        "morphological_rationale": "Simplest stability — smooth folds, single control parameter, matte diffuse. The field exhibits no discontinuities.",
+        "visual_character": "Concentric interference rings, smooth gradients, crystalline order with bilateral symmetry"
+    },
+
+    "phase_migration": {
+        "name": "Phase Migration",
+        "description": "Transitional drift — field exploring between stable and chaotic regimes",
+        "coordinates": {
+            "control_complexity": 0.45,
+            "geometric_sharpness": 0.40,
+            "surface_tension": 0.50,
+            "optical_intensity": 0.65,
+            "aesthetic_intensity": 0.70
+        },
+        "observables": {
+            "eigen_drift_range": [0.05, 0.2],
+            "diff_mag_range": [0.01, 0.1]
+        },
+        "nearest_catastrophe": "swallowtail",
+        "morphological_rationale": "Multi-path topology with flowing transitions — multiple stable states coexist as the field migrates between attractors. Context-dependent path selection.",
+        "visual_character": "Flowing deformation of concentric structure, iridescent color shifts, trailing forms as patterns sweep between regimes"
+    },
+
+    "wave_chaos": {
+        "name": "Wave Chaos",
+        "description": "High-frequency field turbulence — frame-to-frame volatility dominates",
+        "coordinates": {
+            "control_complexity": 0.50,
+            "geometric_sharpness": 0.30,
+            "surface_tension": 0.45,
+            "optical_intensity": 0.70,
+            "aesthetic_intensity": 0.80
+        },
+        "observables": {
+            "diff_mag_min": 0.1
+        },
+        "nearest_catastrophe": "elliptic_umbilic",
+        "morphological_rationale": "Wave-like bifurcation with three-fold symmetry — oscillating tension, periodic interference. The field exhibits rhythmic instability rather than structural drift.",
+        "visual_character": "Radiating wave interference, cross-hatched moiré patterns, metallic oscillation bands, the characteristic fractal noise of high-frequency competition"
+    },
+
+    "fractal_bloom": {
+        "name": "Fractal Bloom",
+        "description": "Emergent complexity — structural transformation from crystalline order to fractal emergence",
+        "coordinates": {
+            "control_complexity": 0.80,
+            "geometric_sharpness": 0.55,
+            "surface_tension": 0.60,
+            "optical_intensity": 0.85,
+            "aesthetic_intensity": 0.95
+        },
+        "observables": {
+            "eigen_drift_min": 0.2
+        },
+        "nearest_catastrophe": "butterfly",
+        "morphological_rationale": "Four-dimensional control with compromise pocket — the 'bloom' is the butterfly catastrophe's pocket opening, where multiple coexisting states create emergent structural color and bilateral symmetry from underlying complexity.",
+        "visual_character": "Petal-like resonance structures, bilateral symmetry from stereoscopic inversion, golden-plasma energy concentration at crystal center, maximum aesthetic presence"
+    }
+}
+
+# Ordered evolution path for trajectory computation
+EVOLUTION_STATE_ORDER = ["stable_harmonic", "phase_migration", "wave_chaos", "fractal_bloom"]
 
 
 # ============================================================================
@@ -785,6 +896,16 @@ CATASTROPHE_RHYTHMIC_PRESETS = {
         "steps_per_cycle": 22,
         "use_case": "Tension oscillation for stress-field animation",
         "visual_effect": "Breathing between minimal and maximum surface tension"
+    },
+    "amorphosis_cycle": {
+        "description": "Crystal field evolution: stability → migration → chaos → bloom → decay",
+        "state_a_id": "fold",
+        "state_b_id": "butterfly",
+        "oscillation_pattern": "triangular",
+        "num_cycles": 2,
+        "steps_per_cycle": 30,
+        "use_case": "Amorphosis simulation — ordered crystalline structure to emergent fractal complexity",
+        "visual_effect": "Progressive dissolution from crystalline order through wave chaos to fractal bloom, then gradual re-crystallization"
     }
 }
 
@@ -913,6 +1034,444 @@ def list_catastrophe_rhythmic_presets() -> dict:
             for name, cfg in CATASTROPHE_RHYTHMIC_PRESETS.items()
         },
         "total_presets": len(CATASTROPHE_RHYTHMIC_PRESETS)
+    }
+
+
+# ============================================================================
+# PHASE 2.8: EVOLUTION STATE CLASSIFICATION
+# ============================================================================
+#
+# Functor: Category(DynamicalObservables) → Category(CatastropheVisualTypes)
+#
+# Any simulation that outputs drift-like and change-like metrics can be
+# classified into catastrophe morphology at zero LLM cost. This section
+# implements the bridge between runtime simulation observables and the
+# catastrophe visual vocabulary.
+
+
+def _classify_evolution_state_impl(
+    eigen_drift: float,
+    diff_mag: float
+) -> str:
+    """
+    Deterministic evolution state classification.
+    
+    Applies Jeremiah's threshold logic to map (eigen_drift, diff_mag)
+    to one of four evolution states.
+    
+    Priority order matches the original crystal field simulation:
+    1. Stable Harmonic (both metrics low)
+    2. Fractal Bloom (high drift — structural transformation)
+    3. Wave Chaos (high frame change — temporal volatility)
+    4. Phase Migration (default intermediate)
+    
+    Returns:
+        Evolution state ID string
+    """
+    if eigen_drift < 0.05 and diff_mag < 0.01:
+        return "stable_harmonic"
+    elif eigen_drift > 0.2:
+        return "fractal_bloom"
+    elif diff_mag > 0.1:
+        return "wave_chaos"
+    else:
+        return "phase_migration"
+
+
+def _interpolate_evolution_coordinates(
+    eigen_drift: float,
+    diff_mag: float
+) -> dict:
+    """
+    Continuous interpolation in 5D catastrophe morphospace based on observables.
+    
+    Rather than snapping to discrete states, this computes a smooth position
+    in morphospace by blending between the four evolution state coordinates
+    using normalized observable magnitudes as weights.
+    
+    This allows the visual vocabulary to evolve continuously as the simulation
+    runs, producing smooth prompt transitions rather than discrete jumps.
+    
+    Returns:
+        Dict with interpolated 5D coordinates
+    
+    Cost: 0 tokens (pure numpy)
+    """
+    # Normalize observables to [0, 1] range
+    # eigen_drift: practical range [0, 10+] — use sigmoid-like scaling
+    drift_norm = min(1.0, eigen_drift / 1.0)  # saturates at drift=1.0
+    dmag_norm = min(1.0, diff_mag / 0.5)       # saturates at diff_mag=0.5
+    
+    # Compute weights for each evolution state based on proximity
+    # in observable space
+    weights = {}
+    
+    # Stable Harmonic: strongest when both metrics near zero
+    # Each factor clamped individually to prevent negative*negative=positive
+    weights["stable_harmonic"] = max(0.0, 1.0 - drift_norm * 3) * max(0.0, 1.0 - dmag_norm * 3)
+    
+    # Fractal Bloom: strongest when drift is high
+    weights["fractal_bloom"] = max(0.0, drift_norm * 2 - 0.2)
+    
+    # Wave Chaos: strongest when diff_mag is high but drift is moderate
+    weights["wave_chaos"] = max(0.0, dmag_norm * 2 - 0.2) * max(0.0, 1.0 - drift_norm * 1.5)
+    
+    # Phase Migration: fills the gap — moderate values of both
+    migration_center = 0.3
+    weights["phase_migration"] = max(0.0, 
+        1.0 - abs(drift_norm - migration_center) * 3 - abs(dmag_norm - migration_center) * 3
+    )
+    
+    # Normalize weights
+    total = sum(weights.values())
+    if total < 1e-8:
+        # Fallback: equal weight to phase_migration
+        weights = {"stable_harmonic": 0.0, "phase_migration": 1.0, 
+                   "wave_chaos": 0.0, "fractal_bloom": 0.0}
+        total = 1.0
+    
+    weights = {k: v / total for k, v in weights.items()}
+    
+    # Blend coordinates
+    interpolated = {}
+    for param in PARAMETER_NAMES:
+        interpolated[param] = sum(
+            weights[state_id] * CRYSTAL_EVOLUTION_STATES[state_id]["coordinates"][param]
+            for state_id in CRYSTAL_EVOLUTION_STATES
+        )
+    
+    return {
+        "coordinates": interpolated,
+        "weights": {k: round(v, 4) for k, v in weights.items()},
+        "dominant_state": max(weights, key=weights.get),
+        "blend_entropy": float(-sum(
+            w * np.log(w + 1e-10) for w in weights.values()
+        ) / np.log(4))  # normalized to [0, 1]
+    }
+
+
+@mcp.tool()
+def classify_evolution_state(
+    eigen_drift: float,
+    diff_mag: float
+) -> dict:
+    """
+    Classify crystal field evolution state into catastrophe morphology.
+    
+    PHASE 2.8 TOOL: Bridge between dynamical simulation observables and
+    catastrophe visual vocabulary. Takes the two metrics from Jeremiah's
+    crystal field evolution system and returns full catastrophe morphology
+    with visual vocabulary and image generation prompt.
+    
+    This is a functor from Category(DynamicalObservables) to
+    Category(CatastropheVisualTypes) — any simulation outputting drift-like
+    and change-like metrics gets catastrophe aesthetics at zero LLM cost.
+    
+    Args:
+        eigen_drift: Eigenvalue drift from baseline SVD modes (structural deviation).
+                     Range: 0.0+ (typically 0-10 in crystal field simulation)
+        diff_mag: Mean frame-to-frame field magnitude change (temporal volatility).
+                  Range: 0.0+ (typically 0-0.5 in crystal field simulation)
+    
+    Returns:
+        Dict with:
+            evolution_state: Discrete state classification
+            nearest_catastrophe: Corresponding elementary catastrophe
+            coordinates: 5D morphospace position
+            visual_vocabulary: Keywords, optical properties, colors
+            prompt: Ready-to-use image generation prompt
+            morphological_rationale: Why this mapping exists
+            observables: Echo of input metrics
+    
+    Cost: 0 tokens (pure Layer 2 deterministic)
+    
+    Classification Thresholds:
+        Stable Harmonic:  drift < 0.05 AND Δ < 0.01  →  fold
+        Phase Migration:  intermediate                 →  swallowtail  
+        Wave Chaos:       Δ > 0.1                      →  elliptic_umbilic
+        Fractal Bloom:    drift > 0.2                  →  butterfly
+    
+    Example:
+        >>> classify_evolution_state(eigen_drift=4.5, diff_mag=0.35)
+        {
+            "evolution_state": "fractal_bloom",
+            "nearest_catastrophe": "butterfly",
+            "prompt": "bilateral symmetry, wing-like structures, ...",
+            ...
+        }
+    """
+    state_id = _classify_evolution_state_impl(eigen_drift, diff_mag)
+    state = CRYSTAL_EVOLUTION_STATES[state_id]
+    
+    vocab = _extract_catastrophe_visual_vocabulary(state["coordinates"])
+    prompt = _build_composite_prompt(state["coordinates"])
+    
+    return {
+        "evolution_state": state_id,
+        "evolution_name": state["name"],
+        "nearest_catastrophe": state["nearest_catastrophe"],
+        "coordinates": state["coordinates"],
+        "visual_vocabulary": {
+            "nearest_type": vocab["nearest_type"],
+            "morphology": vocab["morphology"],
+            "distance": vocab["distance"],
+            "keywords": vocab["keywords"],
+            "optical_properties": vocab["optical_properties"],
+            "color_associations": vocab["color_associations"],
+            "intentionality": vocab["intentionality"]
+        },
+        "prompt": prompt,
+        "morphological_rationale": state["morphological_rationale"],
+        "visual_character": state["visual_character"],
+        "observables": {
+            "eigen_drift": eigen_drift,
+            "diff_mag": diff_mag
+        },
+        "cost": "0 tokens"
+    }
+
+
+@mcp.tool()
+def map_observables_to_morphospace(
+    eigen_drift: float,
+    diff_mag: float,
+    style_modifier: str = ""
+) -> dict:
+    """
+    Continuously map simulation observables to catastrophe morphospace position.
+    
+    PHASE 2.8 TOOL: Unlike classify_evolution_state (which snaps to discrete
+    states), this tool computes a smooth interpolated position in 5D catastrophe
+    morphospace. Useful for real-time visualization where you want continuous
+    prompt evolution rather than discrete state transitions.
+    
+    The interpolation uses weighted blending between the four evolution state
+    coordinates, with weights derived from normalized observable magnitudes.
+    
+    Args:
+        eigen_drift: Eigenvalue drift from baseline (structural deviation)
+        diff_mag: Frame-to-frame field magnitude change (temporal volatility)
+        style_modifier: Optional style prefix for generated prompt
+    
+    Returns:
+        Dict with:
+            interpolated_coordinates: Smooth 5D position
+            blend_weights: How much each evolution state contributes
+            dominant_state: Strongest contributing state
+            blend_entropy: 0=pure state, 1=maximally blended
+            prompt: Image generation prompt from interpolated position
+            discrete_classification: What classify_evolution_state would return
+    
+    Cost: 0 tokens (pure Layer 2 deterministic)
+    
+    Example:
+        >>> map_observables_to_morphospace(eigen_drift=0.15, diff_mag=0.08)
+        {
+            "dominant_state": "phase_migration",
+            "blend_entropy": 0.62,
+            "blend_weights": {
+                "stable_harmonic": 0.15,
+                "phase_migration": 0.55,
+                "wave_chaos": 0.20,
+                "fractal_bloom": 0.10
+            },
+            "prompt": "flowing curves, trailing forms, ...",
+            ...
+        }
+    """
+    # Continuous interpolation
+    interp = _interpolate_evolution_coordinates(eigen_drift, diff_mag)
+    
+    # Extract vocabulary from interpolated position
+    vocab = _extract_catastrophe_visual_vocabulary(interp["coordinates"])
+    prompt = _build_composite_prompt(interp["coordinates"], style_modifier)
+    
+    # Also compute discrete classification for comparison
+    discrete_state = _classify_evolution_state_impl(eigen_drift, diff_mag)
+    
+    return {
+        "interpolated_coordinates": interp["coordinates"],
+        "blend_weights": interp["weights"],
+        "dominant_state": interp["dominant_state"],
+        "blend_entropy": round(interp["blend_entropy"], 4),
+        "visual_vocabulary": {
+            "nearest_type": vocab["nearest_type"],
+            "morphology": vocab["morphology"],
+            "distance": vocab["distance"],
+            "keywords": vocab["keywords"],
+            "optical_properties": vocab["optical_properties"],
+            "color_associations": vocab["color_associations"]
+        },
+        "prompt": prompt,
+        "discrete_classification": discrete_state,
+        "discrete_matches_dominant": discrete_state == interp["dominant_state"],
+        "observables": {
+            "eigen_drift": eigen_drift,
+            "diff_mag": diff_mag
+        },
+        "cost": "0 tokens"
+    }
+
+
+@mcp.tool()
+def get_evolution_state_specifications() -> dict:
+    """
+    List all crystal field evolution states with catastrophe mappings.
+    
+    PHASE 2.8 TOOL: Reference for the evolution state → catastrophe
+    morphology functor. Shows coordinates, observable thresholds,
+    morphological rationale, and visual character for each state.
+    
+    Cost: 0 tokens (pure Layer 1 lookup)
+    """
+    states = {}
+    for state_id, state_data in CRYSTAL_EVOLUTION_STATES.items():
+        vocab = _extract_catastrophe_visual_vocabulary(state_data["coordinates"])
+        states[state_id] = {
+            "name": state_data["name"],
+            "description": state_data["description"],
+            "nearest_catastrophe": state_data["nearest_catastrophe"],
+            "coordinates": state_data["coordinates"],
+            "observables": state_data["observables"],
+            "morphological_rationale": state_data["morphological_rationale"],
+            "visual_character": state_data["visual_character"],
+            "nearest_visual_type": vocab["nearest_type"],
+            "distance_to_type": round(vocab["distance"], 4)
+        }
+    
+    return {
+        "evolution_states": states,
+        "total_states": len(states),
+        "evolution_order": EVOLUTION_STATE_ORDER,
+        "observable_dimensions": ["eigen_drift", "diff_mag"],
+        "morphospace_dimensions": PARAMETER_NAMES,
+        "classification_thresholds": {
+            "stable_harmonic": "drift < 0.05 AND Δ < 0.01",
+            "fractal_bloom": "drift > 0.2",
+            "wave_chaos": "Δ > 0.1",
+            "phase_migration": "intermediate (default)"
+        },
+        "functor_description": "Category(DynamicalObservables) → Category(CatastropheVisualTypes)"
+    }
+
+
+@mcp.tool()
+def generate_amorphosis_trajectory(
+    num_steps: int = 60,
+    style_modifier: str = "",
+    keyframe_count: int = 8
+) -> dict:
+    """
+    Generate the full amorphosis trajectory through all four evolution states.
+    
+    PHASE 2.8 TOOL: Computes a trajectory that passes through all four
+    crystal field evolution states in order:
+    
+        Stable Harmonic → Phase Migration → Wave Chaos → Fractal Bloom
+    
+    Unlike the amorphosis_cycle rhythmic preset (which oscillates between
+    fold and butterfly), this tool traces through ALL four intermediate
+    states, producing keyframe prompts at each stage of the evolution.
+    
+    Useful for:
+    - Storyboarding a complete crystal field evolution sequence
+    - Generating animation keyframes for the full amorphosis process
+    - Understanding how visual vocabulary transforms through the evolution
+    
+    Args:
+        num_steps: Total trajectory steps across all 4 states (default: 60)
+        style_modifier: Optional style prefix for prompts
+        keyframe_count: Number of keyframes to extract (default: 8)
+    
+    Returns:
+        Dict with trajectory states, keyframe prompts, and evolution metadata
+    
+    Cost: 0 tokens (pure Layer 2)
+    """
+    # Build trajectory through all 4 evolution states
+    steps_per_segment = num_steps // 3  # 3 transitions between 4 states
+    remainder = num_steps - (steps_per_segment * 3)
+    
+    trajectory = []
+    
+    for seg_idx in range(3):
+        start_state = CRYSTAL_EVOLUTION_STATES[EVOLUTION_STATE_ORDER[seg_idx]]
+        end_state = CRYSTAL_EVOLUTION_STATES[EVOLUTION_STATE_ORDER[seg_idx + 1]]
+        
+        seg_steps = steps_per_segment + (1 if seg_idx < remainder else 0)
+        
+        for step in range(seg_steps):
+            alpha = step / max(1, seg_steps - 1)
+            interpolated = {
+                param: float(
+                    (1 - alpha) * start_state["coordinates"][param] +
+                    alpha * end_state["coordinates"][param]
+                )
+                for param in PARAMETER_NAMES
+            }
+            trajectory.append({
+                "state": interpolated,
+                "segment": seg_idx,
+                "segment_alpha": round(alpha, 4),
+                "from_evolution": EVOLUTION_STATE_ORDER[seg_idx],
+                "to_evolution": EVOLUTION_STATE_ORDER[seg_idx + 1]
+            })
+    
+    # Add final state
+    final_state = CRYSTAL_EVOLUTION_STATES[EVOLUTION_STATE_ORDER[-1]]
+    trajectory.append({
+        "state": final_state["coordinates"],
+        "segment": 2,
+        "segment_alpha": 1.0,
+        "from_evolution": EVOLUTION_STATE_ORDER[-1],
+        "to_evolution": EVOLUTION_STATE_ORDER[-1]
+    })
+    
+    # Extract keyframes
+    total = len(trajectory)
+    indices = np.linspace(0, total - 1, keyframe_count, dtype=int)
+    
+    keyframes = []
+    for i, idx in enumerate(indices):
+        traj_point = trajectory[idx]
+        state = traj_point["state"]
+        vocab = _extract_catastrophe_visual_vocabulary(state)
+        prompt = _build_composite_prompt(state, style_modifier)
+        
+        # Determine which evolution state this keyframe is in
+        evolution_state = traj_point["from_evolution"]
+        if traj_point["segment_alpha"] > 0.5:
+            evolution_state = traj_point["to_evolution"]
+        
+        keyframes.append({
+            "keyframe_index": i,
+            "step": int(idx),
+            "evolution_state": evolution_state,
+            "evolution_name": CRYSTAL_EVOLUTION_STATES[evolution_state]["name"],
+            "nearest_catastrophe": CRYSTAL_EVOLUTION_STATES[evolution_state]["nearest_catastrophe"],
+            "state": state,
+            "nearest_visual_type": vocab["nearest_type"],
+            "morphology": vocab["morphology"],
+            "prompt": prompt,
+            "visual_character": CRYSTAL_EVOLUTION_STATES[evolution_state]["visual_character"]
+        })
+    
+    return {
+        "trajectory_type": "amorphosis_full",
+        "description": "Complete crystal field evolution: Stable Harmonic → Phase Migration → Wave Chaos → Fractal Bloom",
+        "evolution_path": [
+            {
+                "state": eid,
+                "name": CRYSTAL_EVOLUTION_STATES[eid]["name"],
+                "catastrophe": CRYSTAL_EVOLUTION_STATES[eid]["nearest_catastrophe"]
+            }
+            for eid in EVOLUTION_STATE_ORDER
+        ],
+        "total_steps": len(trajectory),
+        "num_segments": 3,
+        "keyframes": keyframes,
+        "total_keyframes": len(keyframes),
+        "cost": "0 tokens"
     }
 
 
@@ -1724,7 +2283,11 @@ def get_server_info() -> dict:
                 "extract_catastrophe_visual_vocabulary - Parameter→keyword mapping (Phase 2.7)",
                 "generate_catastrophe_attractor_prompt - Attractor→image prompt (Phase 2.7)",
                 "list_catastrophe_attractor_presets - Attractor catalog (Phase 2.7)",
-                "generate_catastrophe_sequence_prompts - Keyframe prompts (Phase 2.7)"
+                "generate_catastrophe_sequence_prompts - Keyframe prompts (Phase 2.7)",
+                "classify_evolution_state - Observable→morphology classification (Phase 2.8)",
+                "map_observables_to_morphospace - Continuous interpolation (Phase 2.8)",
+                "get_evolution_state_specifications - Evolution state reference (Phase 2.8)",
+                "generate_amorphosis_trajectory - Full evolution keyframes (Phase 2.8)"
             ],
             "layer_3_synthesis": [
                 "prepare_transition_visualization - Visualization context"
@@ -1811,6 +2374,33 @@ def get_server_info() -> dict:
                 "DALL-E",
                 "Midjourney (prompt adaptation may be needed)"
             ]
+        },
+        "phase_2_8_enhancements": {
+            "evolution_state_classification": True,
+            "evolution_states": len(CRYSTAL_EVOLUTION_STATES),
+            "evolution_state_names": list(CRYSTAL_EVOLUTION_STATES.keys()),
+            "classification_tools": [
+                "classify_evolution_state - Discrete classification",
+                "map_observables_to_morphospace - Continuous interpolation",
+                "get_evolution_state_specifications - State reference",
+                "generate_amorphosis_trajectory - Full evolution keyframes"
+            ],
+            "observable_inputs": ["eigen_drift", "diff_mag"],
+            "functor_type": "Category(DynamicalObservables) → Category(CatastropheVisualTypes)",
+            "evolution_catastrophe_mappings": {
+                "stable_harmonic": "fold",
+                "phase_migration": "swallowtail",
+                "wave_chaos": "elliptic_umbilic",
+                "fractal_bloom": "butterfly"
+            },
+            "features": [
+                "Discrete state classification from 2 observables",
+                "Continuous 5D interpolation with blend entropy",
+                "Full amorphosis trajectory with keyframe prompts",
+                "Generalizable to any simulation with drift/change metrics",
+                "Zero LLM cost for all operations"
+            ],
+            "amorphosis_preset": "amorphosis_cycle added to Phase 2.6 presets"
         }
     }
 

@@ -51,6 +51,7 @@ from fastmcp import FastMCP
 from pathlib import Path
 import yaml
 import numpy as np
+import math
 from typing import Dict, List, Optional
 import sys
 import re
@@ -92,7 +93,7 @@ print(f"Dynamics available: {DYNAMICS_AVAILABLE}", file=sys.stderr)
 # Server Configuration
 # ============================================================================
 
-SERVER_VERSION = "1.3.0-phase2.8-evolution-classification"
+SERVER_VERSION = "1.4.0-phase2.9-decomposition"
 VALIDATION_DATE = "2026-02-09"
 
 # ============================================================================
@@ -2682,6 +2683,266 @@ def analyze_strategy_document_tool(strategy_text: str) -> str:
         "methodology": "deterministic_pattern_matching",
         "llm_cost_tokens": 0
     }, indent=2)
+
+# ============================================================================
+# PHASE 2.9: AESTHETIC DECOMPOSITION — description → coordinates
+# ============================================================================
+# Inverse of the generative pipeline. Takes a text description (from Claude
+# vision, user input, or any text describing an image) and recovers the 5D
+# catastrophe coordinates via keyword matching against CATASTROPHE_VISUAL_TYPES.
+#
+# Layer 2: deterministic, 0 LLM tokens.
+# Completes the round-trip: coordinates → prompt → image → description → coordinates
+# ============================================================================
+
+_DECOMPOSE_STOP_WORDS = frozenset({
+    'a', 'an', 'the', 'in', 'on', 'at', 'to', 'of', 'for', 'with',
+    'by', 'from', 'and', 'or', 'but', 'as', 'is', 'are', 'was', 'were',
+    'be', 'been', 'being', 'has', 'have', 'had', 'do', 'does', 'did',
+    'no', 'not', 'all', 'its', 'this', 'that', 'into', 'over',
+})
+
+# Type → morphology mapping (reuse of existing mapping from line 1756)
+_TYPE_TO_MORPHOLOGY = {
+    "fold_smooth": "fold",
+    "cusp_crystalline": "cusp",
+    "swallowtail_flowing": "swallowtail",
+    "butterfly_radiant": "butterfly",
+    "umbilic_wave": "elliptic_umbilic",
+    "umbilic_tension": "hyperbolic_umbilic",
+    "mushroom_organic": "parabolic_umbilic",
+}
+
+
+def _decompose_extract_fragments(keyword: str) -> list:
+    """Extract matchable sub-phrases from a keyword string.
+
+    Sliding window of 2-4 words, plus full keyword if 3+ words.
+    Skips fragments that are mostly stop words.
+    """
+    words = keyword.lower().split()
+    fragments = []
+    if len(words) >= 3:
+        fragments.append(keyword.lower())
+    for ws in (4, 3, 2):
+        for i in range(len(words) - ws + 1):
+            chunk = words[i:i + ws]
+            if any(len(w) > 3 and w not in _DECOMPOSE_STOP_WORDS for w in chunk):
+                fragments.append(' '.join(chunk))
+    return fragments
+
+
+def _decompose_score_type(
+    type_id: str,
+    type_data: dict,
+    words: set,
+    full_text: str,
+    morph_optical: dict,
+    morph_colors: list,
+) -> tuple:
+    """Score a single visual type against input text.
+
+    Returns (score, matched_fragments).
+    """
+    score = 0.0
+    matched = []
+
+    # --- Keyword fragment matching ---
+    for kw in type_data["keywords"]:
+        best_s, best_f = 0.0, None
+        for frag in _decompose_extract_fragments(kw):
+            if frag in full_text:
+                if 1.0 > best_s:
+                    best_s, best_f = 1.0, frag
+            else:
+                frag_words = set(frag.split()) - _DECOMPOSE_STOP_WORDS
+                if frag_words:
+                    overlap = len(frag_words & words) / len(frag_words)
+                    ws = overlap * 0.3
+                    if ws > best_s:
+                        best_s, best_f = ws, frag
+        if best_f and best_s > 0:
+            score += best_s
+            matched.append(best_f)
+
+    # --- Optical property matching (from morphology data) ---
+    for prop_val in morph_optical.values():
+        if isinstance(prop_val, str):
+            pwords = set(prop_val.lower().replace('_', ' ').replace('-', ' ').split())
+            pwords -= _DECOMPOSE_STOP_WORDS
+            if pwords:
+                olap = len(pwords & words)
+                if olap > 0:
+                    score += 0.5 * (olap / len(pwords))
+                    matched.append(f"optical:{prop_val}")
+
+    # --- Color association matching (from morphology data) ---
+    for color in morph_colors:
+        if isinstance(color, str):
+            cl = color.lower()
+            if cl in full_text:
+                score += 0.4
+                matched.append(f"color:{color}")
+            else:
+                cwords = set(cl.split()) - _DECOMPOSE_STOP_WORDS
+                if cwords and len(cwords & words) > 0:
+                    score += 0.2 * (len(cwords & words) / len(cwords))
+
+    return score, matched
+
+
+def _decompose_catastrophe(description: str) -> dict:
+    """Core decomposition: text description → 5D catastrophe coordinates.
+
+    Algorithm:
+      1. Tokenize description
+      2. Score each visual type via keyword/optical/color matching
+      3. Softmax-blend type centers → recovered coordinates
+      4. Compute confidence from max score vs theoretical maximum
+
+    Layer 2: deterministic, 0 LLM tokens.
+    """
+    lower = description.lower()
+    words = set(re.findall(r'[a-z]+(?:-[a-z]+)*', lower))
+
+    type_scores = {}
+    type_matched = {}
+
+    for tid, tdata in CATASTROPHE_VISUAL_TYPES.items():
+        morph_id = _TYPE_TO_MORPHOLOGY.get(tid, "fold")
+        morph_data = CATASTROPHE_MORPHOLOGIES.get(morph_id, {})
+        morph_optical = morph_data.get("optical_properties", {})
+        morph_colors = morph_data.get("color_associations", [])
+
+        sc, mt = _decompose_score_type(tid, tdata, words, lower,
+                                       morph_optical, morph_colors)
+        type_scores[tid] = sc
+        type_matched[tid] = mt
+
+    max_score = max(type_scores.values()) if type_scores else 0
+    # Max possible ≈ 8 keywords × 1.0 + 3 optical × 0.5 + 4 colors × 0.4 = 11.1
+    max_possible = 8 * 1.0 + 3 * 0.5 + 4 * 0.4
+    confidence = min(1.0, max_score / max_possible) if max_possible > 0 else 0.0
+
+    if confidence < 0.03:
+        return {
+            "coordinates": {p: 0.5 for p in PARAMETER_NAMES},
+            "confidence": 0.0,
+            "nearest_type": "",
+            "type_scores": {k: round(v, 3) for k, v in type_scores.items()},
+            "matched_fragments": [],
+            "domain_detected": False,
+        }
+
+    # Softmax blend with temperature=1.5
+    temp = 1.5
+    max_s = max(type_scores.values())
+    exps = {k: math.exp((v - max_s) / temp) for k, v in type_scores.items()}
+    exp_sum = sum(exps.values())
+    weights = {k: v / exp_sum for k, v in exps.items()}
+
+    # Blend coordinates
+    coords = {p: 0.0 for p in PARAMETER_NAMES}
+    for tid, w in weights.items():
+        if w > 0:
+            tc = CATASTROPHE_VISUAL_TYPES[tid]["coords"]
+            for p in PARAMETER_NAMES:
+                coords[p] += w * tc.get(p, 0)
+    coords = {p: round(v, 4) for p, v in coords.items()}
+
+    # Nearest type
+    nearest = max(type_scores, key=type_scores.get)
+    nc = CATASTROPHE_VISUAL_TYPES[nearest]["coords"]
+    nearest_dist = math.sqrt(sum((coords.get(p, 0) - nc.get(p, 0)) ** 2
+                                 for p in PARAMETER_NAMES))
+
+    # Collect all matched fragments (deduplicated, no optical:/color: prefixes)
+    all_matched = []
+    for tid in type_scores:
+        all_matched.extend(m for m in type_matched.get(tid, [])
+                           if not m.startswith(("optical:", "color:")))
+    unique_matched = list(dict.fromkeys(all_matched))
+
+    # Optical + color matches
+    optical_hits = {}
+    color_hits = []
+    for tid in type_scores:
+        for m in type_matched.get(tid, []):
+            if m.startswith("optical:"):
+                optical_hits[m.split(":", 1)[1]] = tid
+            elif m.startswith("color:"):
+                color_hits.append(m.split(":", 1)[1])
+
+    return {
+        "coordinates": coords,
+        "confidence": round(confidence, 4),
+        "nearest_type": nearest,
+        "nearest_type_distance": round(nearest_dist, 4),
+        "morphology": _TYPE_TO_MORPHOLOGY.get(nearest, "fold"),
+        "type_scores": {k: round(v, 3) for k, v in type_scores.items()},
+        "type_weights": {k: round(v, 4) for k, v in weights.items()},
+        "matched_fragments": unique_matched[:10],
+        "optical_matches": optical_hits,
+        "color_matches": list(dict.fromkeys(color_hits)),
+        "domain_detected": True,
+    }
+
+
+@mcp.tool()
+def decompose_catastrophe_from_description(description: str) -> str:
+    """Decompose text description into catastrophe morphospace coordinates.
+
+    INVERSE of the generative pipeline: takes an image description (from
+    Claude vision output, user text, or any aesthetic description) and
+    recovers the 5D catastrophe parameter coordinates via deterministic
+    keyword matching against the visual vocabulary types.
+
+    Completes the round-trip:
+        coordinates → prompt → image → description → coordinates
+
+    Algorithm:
+      1. Tokenize description into word set + bigrams
+      2. Score each of 7 visual types via keyword/optical/color matching
+      3. Softmax-blend type centers → recovered 5D coordinates
+      4. Confidence = how much catastrophe vocabulary detected (not quality)
+
+    This is Layer 2: deterministic, 0 LLM tokens.
+
+    Args:
+        description: Text describing an image or aesthetic artifact.
+            Works with Claude vision output, user descriptions, or
+            any text containing catastrophe-relevant visual vocabulary.
+
+    Returns:
+        JSON with:
+          coordinates: {control_complexity, geometric_sharpness,
+                       surface_tension, optical_intensity, aesthetic_intensity}
+          confidence: 0-1 (how much catastrophe vocabulary present)
+          nearest_type: Best-matching visual type
+          morphology: Catastrophe morphology of nearest type
+          type_scores: Raw score per visual type
+          type_weights: Softmax weights used for blending
+          matched_fragments: Which vocabulary fragments matched
+          domain_detected: Whether catastrophe aesthetics detected at all
+
+    Example:
+        >>> decompose_catastrophe_from_description(
+        ...     "sharp crystalline vertices with metallic specular facets, "
+        ...     "cusp points catching hard-edged light"
+        ... )
+        {
+            "coordinates": {"control_complexity": 0.27, ...},
+            "confidence": 0.62,
+            "nearest_type": "cusp_crystalline",
+            "morphology": "cusp",
+            ...
+        }
+    """
+    import json
+
+    result = _decompose_catastrophe(description)
+    return json.dumps(result, indent=2)
+
 
 # ============================================================================
 # ENTRY POINT
